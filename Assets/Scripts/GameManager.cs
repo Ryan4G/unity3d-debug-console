@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
 
     private int sphereCount = 0;
 
+    List<GameObject> m_maters;
+
     public int CubeCount
     {
         get
@@ -32,6 +34,11 @@ public class GameManager : MonoBehaviour
     public LayerMask m_layer;
 
     private Camera m_main;
+
+    private void Awake()
+    {
+        this.m_maters = new List<GameObject>();
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -59,11 +66,41 @@ public class GameManager : MonoBehaviour
                 {
                     var isCube = info.transform.name.Contains("Cube");
 
-                    Destroy(info.transform.gameObject);
-
-                    GameManager.Instance.UpdateAmount(isCube, false);
+                    RemoveMater(info.transform.gameObject, isCube);
                 }
             }
+        }
+    }
+
+    public void AddMater(GameObject go, bool isCube)
+    {
+        this.m_maters.Add(go);
+        UpdateAmount(isCube, true);
+    }
+
+    public void RemoveMater(GameObject go, bool isCube)
+    {
+        this.m_maters.Remove(go);
+
+        Destroy(go);
+
+        UpdateAmount(isCube, false);
+
+    }
+
+    public void RemoveAllMaters()
+    {
+        int len = this.m_maters.Count;
+
+        while (len > 0)
+        {
+            GameObject go = this.m_maters[0];
+
+            this.m_maters.RemoveAt(0);
+
+            RemoveMater(go, go.name.Contains("Cube"));
+
+            len = this.m_maters.Count;
         }
     }
 
@@ -78,5 +115,23 @@ public class GameManager : MonoBehaviour
             sphereCount += added ? 1 : -1;
         }
         m_gameTitle.text = $"Cube:{cubeCount} Sphere:{sphereCount}";
+    }
+
+    public Transform CreateMater(Transform prefab, List<Material> materials, Vector3 pos, bool isCube)
+    {
+        pos.x += Random.Range(-3, 3);
+        pos.y += Random.Range(1, 3);
+        pos.z += Random.Range(-3, 3);
+
+        Transform t = Instantiate(prefab, pos, Quaternion.identity);
+        MeshRenderer mesh = t.GetComponent<MeshRenderer>();
+
+        var randIdx = Mathf.FloorToInt(Random.Range(0, materials.Count));
+        mesh.material = materials[randIdx];
+
+        AddMater(t.gameObject, isCube);
+
+        return t;
+
     }
 }

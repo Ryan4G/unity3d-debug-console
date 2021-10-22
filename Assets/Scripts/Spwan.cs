@@ -13,9 +13,13 @@ public class Spwan : MonoBehaviour
 
     private bool isCube = false;
 
+    private Transform m_tranform;
+
     // Start is called before the first frame update
     void Start()
     {
+        m_tranform = this.transform;
+
         isCube = m_prefab.name.CompareTo("Cube") == 0;
         StartCoroutine(CreateSpawn());
     }
@@ -34,21 +38,7 @@ public class Spwan : MonoBehaviour
         }
         while (--m_timer > 0);
 
-        Vector3 pos = this.transform.position;
-
-        pos.x += Random.Range(-3, 3);
-        pos.y += Random.Range(1, 3);
-        pos.z += Random.Range(-3, 3);
-
-        Transform t = Instantiate(m_prefab, pos, Quaternion.identity);
-        MeshRenderer mesh = t.GetComponent<MeshRenderer>();
-
-        var randIdx = Mathf.FloorToInt(Random.Range(0, m_materials.Count));
-        mesh.material = m_materials[randIdx];
-
-        GameManager.Instance.UpdateAmount(isCube, true);
-
-        yield return t;
+        yield return GameManager.Instance.CreateMater(m_prefab, m_materials, m_tranform.position, isCube);
 
         m_timer = Random.Range(4, 6);
 
